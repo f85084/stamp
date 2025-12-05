@@ -485,6 +485,7 @@
             :childrenList="childrenList"
             @refresh-profiles="refreshProfiles"
             @set-search-name="setSearchName"
+            @show-success="showSuccessModal"
           />
           <SummaryView
             v-else-if="activeTab === 'summary'"
@@ -827,7 +828,7 @@
       const AddChildView = {
         template: "#add-child-view-template",
         props: ["childrenList"],
-        emits: ["refresh-profiles", "set-search-name"],
+        emits: ["refresh-profiles", "set-search-name", "show-success"],
         setup(props, { emit }) {
           const formState = reactive({
             name: "",
@@ -853,7 +854,7 @@
                 formState.bgUrl,
                 formState.stamp
               );
-              alert("已送出，請稍後重新整理名單");
+              emit("show-success", "已送出，請稍後重新整理名單");
               formState.name = "";
               formState.bgUrl = "";
               formState.stamp = "";
@@ -1097,6 +1098,14 @@
             redeemModal.visible = true;
           };
 
+          const showSuccessModal = (message) => {
+            successModal.message = message;
+            successModal.visible = true;
+            setTimeout(() => {
+              successModal.visible = false;
+            }, 500);
+          };
+
           const closeRedeemModal = () => {
             redeemModal.visible = false;
           };
@@ -1111,11 +1120,7 @@
                 timestamp: formatDate(new Date()),
               });
               closeRedeemModal();
-              successModal.message = `成功兌換 ${count} 點`;
-              successModal.visible = true;
-              setTimeout(() => {
-                successModal.visible = false;
-              }, 500);
+              showSuccessModal(`成功兌換 ${count} 點`);
             } catch (error) {
               alert("兌換失敗: " + error.message);
             }
@@ -1175,6 +1180,7 @@
             showRedeemModal,
             closeRedeemModal,
             confirmRedeem,
+            showSuccessModal,
             saveConfig,
             switchTab,
           };
