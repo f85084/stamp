@@ -4,9 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>集點趣</title>
-    
+
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%23475569' d='M312 201.8c0-17.4 9.2-33.2 19.9-47C344.5 138.5 352 118.1 352 96c0-53-43-96-96-96s-96 43-96 96c0 22.1 7.5 42.5 20.1 58.8c10.7 13.8 19.9 29.6 19.9 47c0 29.9-24.3 54.2-54.2 54.2H112C50.1 256 0 306.1 0 368c0 20.9 13.4 38.7 32 45.3V464c0 26.5 21.5 48 48 48H432c26.5 0 48-21.5 48-48V413.3c18.6-6.6 32-24.4 32-45.3c0-61.9-50.1-112-112-112H366.2c-29.9 0-54.2-24.3-54.2-54.2zM416 416H96V400H416v16z'/%3E%3C/svg%3E">
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%23475569' d='M312 201.8c0-17.4 9.2-33.2 19.9-47C344.5 138.5 352 118.1 352 96c0-53-43-96-96-96s-96 43-96 96c0 22.1 7.5 42.5 20.1 58.8c10.7 13.8 19.9 29.6 19.9 47c0 29.9-24.3 54.2-54.2 54.2H112C50.1 256 0 306.1 0 368c0 20.9 13.4 38.7 32 45.3V464c0 26.5 21.5 48 48 48H432c26.5 0 48-21.5 48-48V413.3c18.6-6.6 32-24.4 32-45.3c0-61.9-50.1-112-112-112H366.2c-29.9 0-54.2-24.3-54.2-54.2zM416 416H96V400H416v16z'/%3E%3C/svg%3E"
+    />
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -110,35 +114,20 @@
           <h1 class="text-3xl font-serif text-stone-800 tracking-wide">集點卡</h1>
         </div>
 
-        <div class="relative mb-6 z-20">
-          <div class="flex items-center w-full bg-white rounded-2xl shadow-sm ring-1 ring-stone-200 focus-within:ring-2 focus-within:ring-emerald-500/50 transition-all overflow-hidden">
-            <div class="pl-4 text-stone-400">
-              <i class="fa-solid fa-search"></i>
-            </div>
-            <input
-              :value="searchName"
-              @input="$emit('update:searchName', $event.target.value)"
-              type="text"
-              placeholder="輸入姓名..."
-              class="w-full px-3 py-4 border-none bg-transparent focus:outline-none text-lg text-stone-700 placeholder:text-stone-300"
-            />
-          </div>
-
-          <div v-if="childrenList.length > 0" class="flex gap-2 mt-3 overflow-x-auto pb-2 scrollbar-hide">
-            <button
-              v-for="child in childrenList"
-              :key="child.name"
-              @click="$emit('update:searchName', child.name)"
-              :class="[
-                'whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-all',
-                searchName === child.name
-                  ? getTheme(child.theme).bg + ' text-white shadow-md'
-                  : 'bg-white border border-stone-200 text-stone-500 hover:bg-stone-50',
-              ]"
-            >
-              {{ child.name }}
-            </button>
-          </div>
+        <div v-if="childrenList.length > 0" class="flex gap-2 mt-3 overflow-x-auto pb-2 scrollbar-hide mb-6">
+          <button
+            v-for="child in childrenList"
+            :key="child.name"
+            @click="$emit('update:searchName', child.name)"
+            :class="[
+              'whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-all',
+              searchName === child.name
+                ? getTheme(child.theme).bg + ' text-white shadow-md'
+                : 'bg-white border border-stone-200 text-stone-500 hover:bg-stone-50',
+            ]"
+          >
+            {{ child.name }}
+          </button>
         </div>
 
         <div v-if="isCardVisible" class="flex-1 flex flex-col items-center space-y-8 w-full max-w-sm mx-auto relative z-10">
@@ -197,9 +186,8 @@
         </div>
 
         <div v-else class="flex-1 flex flex-col items-center justify-center text-stone-300 space-y-4 min-h-[50vh]">
-          <i v-if="searchName" class="fa-solid fa-user-xmark opacity-10" style="font-size: 80px;"></i>
-          <i v-else class="fa-solid fa-user opacity-10" style="font-size: 80px;"></i>
-          <p>{{ searchName ? "未找到此人，請先新增名單" : "請搜尋姓名開始集點" }}</p>
+          <i class="fa-solid fa-user opacity-10" style="font-size: 80px;"></i>
+          <p>請選擇名單開始集點</p>
         </div>
 
         <div v-if="isCardVisible" class="fixed bottom-32 left-0 right-0 flex justify-center z-50 pointer-events-none">
@@ -491,13 +479,11 @@
             @update:searchName="searchName = $event"
             @update:stampAnimation="stampAnimation = $event"
             @add-transaction="addTransaction"
-            @remove-last-transaction="removeLastTransaction"
           />
           <AddChildView
             v-else-if="activeTab === 'add'"
             :childrenList="childrenList"
             @refresh-profiles="refreshProfiles"
-            @update-child="updateChild"
             @set-search-name="setSearchName"
           />
           <SummaryView
@@ -554,30 +540,83 @@
           @close="closeRedeemModal"
           @confirm="confirmRedeem"
         />
+
+        <Teleport to="body">
+          <div
+            v-if="successModal.visible"
+            class="fixed inset-0 z-[80] flex items-center justify-center"
+          >
+            <div class="bg-white/95 backdrop-blur-sm px-10 py-8 rounded-[2rem] shadow-2xl animate-popup flex flex-col items-center border border-stone-100">
+              <div class="mb-4 text-emerald-500">
+                <i class="fa-solid fa-circle-check" style="font-size: 64px;"></i>
+              </div>
+              <p class="text-stone-800 text-lg font-bold tracking-wide">{{ successModal.message }}</p>
+            </div>
+          </div>
+        </Teleport>
       </div>
     </script>
 
     <!-- JavaScript -->
     <script>
-      const { createApp, ref, reactive, computed, watch, onMounted, Teleport } = Vue;
+      const { createApp, ref, reactive, computed, watch, onMounted, Teleport } =
+        Vue;
 
       // ==================== CONFIG ====================
       const CONFIG = {
-        pointsSheetUrl: "https://docs.google.com/spreadsheets/d/1VwiAVYi-LpIIG_J7LHUZohQzSKvCi4WLSl6VrqydsHs/export?format=csv",
-        profilesSheetUrl: "https://docs.google.com/spreadsheets/d/1eoUaZ8lWigOQoNb6AnlhDfnDNlQVkXpVstmeQUE0KVA/export?format=csv",
-        webhookAddUrl: "https://hook.eu1.make.com/xibpn714zhigzokihu4jme8if8g5tqe2",
-        webhookRedeemUrl: "https://hook.eu1.make.com/xibpn714zhigzokihu4jme8if8g5tqe2",
-        webhookAddChildUrl: "https://hook.eu1.make.com/fijzr7l2hs7y5h6msu322fy15tfm3l5v"
+        pointsSheetUrl:
+          "https://docs.google.com/spreadsheets/d/1VwiAVYi-LpIIG_J7LHUZohQzSKvCi4WLSl6VrqydsHs/export?format=csv",
+        profilesSheetUrl:
+          "https://docs.google.com/spreadsheets/d/1eoUaZ8lWigOQoNb6AnlhDfnDNlQVkXpVstmeQUE0KVA/export?format=csv",
+        webhookUrl:
+          "https://hook.eu1.make.com/xibpn714zhigzokihu4jme8if8g5tqe2",
+        webhookAddChildUrl:
+          "https://hook.eu1.make.com/fijzr7l2hs7y5h6msu322fy15tfm3l5v",
       };
 
       const CARD_THEMES = {
-        matcha: { name: "抹茶", bg: "bg-emerald-500", text: "text-emerald-600", accent: "bg-emerald-50" },
-        sakura: { name: "櫻花", bg: "bg-pink-400", text: "text-pink-500", accent: "bg-pink-50" },
-        red: { name: "紅豆", bg: "bg-rose-500", text: "text-rose-600", accent: "bg-rose-50" },
-        ocean: { name: "海洋", bg: "bg-blue-500", text: "text-blue-600", accent: "bg-blue-50" },
-        ink: { name: "墨染", bg: "bg-slate-700", text: "text-slate-700", accent: "bg-slate-50" },
-        gold: { name: "金箔", bg: "bg-amber-500", text: "text-amber-600", accent: "bg-amber-50" },
-        default: { name: "預設", bg: "bg-stone-400", text: "text-stone-500", accent: "bg-stone-50" }
+        matcha: {
+          name: "抹茶",
+          bg: "bg-emerald-500",
+          text: "text-emerald-600",
+          accent: "bg-emerald-50",
+        },
+        sakura: {
+          name: "櫻花",
+          bg: "bg-pink-400",
+          text: "text-pink-500",
+          accent: "bg-pink-50",
+        },
+        red: {
+          name: "紅豆",
+          bg: "bg-rose-500",
+          text: "text-rose-600",
+          accent: "bg-rose-50",
+        },
+        ocean: {
+          name: "海洋",
+          bg: "bg-blue-500",
+          text: "text-blue-600",
+          accent: "bg-blue-50",
+        },
+        ink: {
+          name: "墨染",
+          bg: "bg-slate-700",
+          text: "text-slate-700",
+          accent: "bg-slate-50",
+        },
+        gold: {
+          name: "金箔",
+          bg: "bg-amber-500",
+          text: "text-amber-600",
+          accent: "bg-amber-50",
+        },
+        default: {
+          name: "預設",
+          bg: "bg-stone-400",
+          text: "text-stone-500",
+          accent: "bg-stone-50",
+        },
       };
 
       // ==================== UTILS ====================
@@ -621,33 +660,41 @@
           const response = await fetch(url);
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
           const csvText = await response.text();
-          const rows = csvText.split("\n").slice(1).filter((r) => r.trim());
+          const rows = csvText
+            .split("\n")
+            .slice(1)
+            .filter((r) => r.trim());
 
-          const parsedData = rows.map((row) => {
-            const cols = parseCSVRow(row);
-            if (cols.length < 2) return null;
+          const parsedData = rows
+            .map((row) => {
+              const cols = parseCSVRow(row);
+              if (cols.length < 2) return null;
 
-            let name = cols[0];
-            let timestamp = cols[1];
-            let points = "1";
+              let name = cols[0];
+              let timestamp = cols[1];
+              let points = "1";
 
-            if (cols.length >= 3) {
-              const parsedCount = parseInt(cols[2]);
-              if (!isNaN(parsedCount)) points = String(parsedCount);
-            }
+              if (cols.length >= 3) {
+                const parsedCount = parseInt(cols[2]);
+                if (!isNaN(parsedCount)) points = String(parsedCount);
+              }
 
-            // 處理可能的日期/名稱對調
-            if (!isNaN(Date.parse(name)) && name.length > 10) {
-              [name, timestamp] = [timestamp, name];
-            }
+              // 處理可能的日期/名稱對調
+              if (!isNaN(Date.parse(name)) && name.length > 10) {
+                [name, timestamp] = [timestamp, name];
+              }
 
-            // 過濾無效名稱
-            if (!name || ["TRUE", "FALSE", "NAME", "名稱"].includes(name.toUpperCase())) {
-              return null;
-            }
+              // 過濾無效名稱
+              if (
+                !name ||
+                ["TRUE", "FALSE", "NAME", "名稱"].includes(name.toUpperCase())
+              ) {
+                return null;
+              }
 
-            return { name, timestamp, points, type: "add" };
-          }).filter(Boolean);
+              return { name, timestamp, points, type: "add" };
+            })
+            .filter(Boolean);
 
           return parsedData;
         } catch (error) {
@@ -662,9 +709,12 @@
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
           const csvText = await response.text();
           const rows = csvText.split("\n").filter((r) => r.trim());
-          
+
           // 檢查第一行是否為標題
-          let startIdx = (rows[0]?.toLowerCase().includes("name") || rows[0]?.includes("姓名")) ? 1 : 0;
+          let startIdx =
+            rows[0]?.toLowerCase().includes("name") || rows[0]?.includes("姓名")
+              ? 1
+              : 0;
 
           const profilesMap = new Map();
           for (let i = startIdx; i < rows.length; i++) {
@@ -681,7 +731,7 @@
                 name,
                 bgUrl,
                 theme: theme.toLowerCase(),
-                stamp
+                stamp,
               });
             }
           }
@@ -693,30 +743,31 @@
       }
 
       async function sendTransaction(type, name, points) {
-        const url = type === "add" ? CONFIG.webhookAddUrl : CONFIG.webhookRedeemUrl;
         const timestamp = formatDate(new Date());
-        const payload = { type, name, points, timestamp };
-        await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
+        const url = `${CONFIG.webhookUrl}?title=${encodeURIComponent(
+          name
+        )}&date=${encodeURIComponent(timestamp)}&redeem=${points}`;
+        await fetch(url, { method: "GET" });
       }
 
       async function sendAddChild(name, theme, bgUrl, stamp) {
-        const payload = { name, theme, bgUrl, stamp };
-        await fetch(CONFIG.webhookAddChildUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
+        const url = `${CONFIG.webhookAddChildUrl}?name=${encodeURIComponent(
+          name
+        )}&img=${encodeURIComponent(bgUrl)}&color=${encodeURIComponent(
+          theme
+        )}&stamp=${encodeURIComponent(stamp)}`;
+        await fetch(url, { method: "GET" });
       }
 
       // ==================== COMPONENTS ====================
       const StampView = {
         template: "#stamp-view-template",
         props: ["searchName", "childrenList", "transactions", "stampAnimation"],
-        emits: ["update:searchName", "update:stampAnimation", "add-transaction", "remove-last-transaction"],
+        emits: [
+          "update:searchName",
+          "update:stampAnimation",
+          "add-transaction",
+        ],
         setup(props, { emit }) {
           const getTheme = (key) => CARD_THEMES[key] || CARD_THEMES.default;
 
@@ -724,20 +775,29 @@
             return props.childrenList.find((c) => c.name === props.searchName);
           });
 
-          const currentTheme = computed(() => getTheme(currentChild.value?.theme));
+          const currentTheme = computed(() =>
+            getTheme(currentChild.value?.theme)
+          );
           const currentBgUrl = computed(() => currentChild.value?.bgUrl || "");
           const currentStamp = computed(() => currentChild.value?.stamp || "");
 
           const stats = computed(() => {
-            const filtered = props.transactions.filter((t) => t.name && t.name === props.searchName);
-            const total = filtered.reduce((sum, t) => sum + parseInt(t.points || 0), 0);
+            const filtered = props.transactions.filter(
+              (t) => t.name && t.name === props.searchName
+            );
+            const total = filtered.reduce(
+              (sum, t) => sum + parseInt(t.points || 0),
+              0
+            );
             const rewards = Math.floor(total / 10);
             const current = total % 10;
             return { total, rewards, currentCard: current };
           });
 
           const progress = computed(() => (stats.value.currentCard / 10) * 100);
-          const isCardVisible = computed(() => props.searchName && currentChild.value);
+          const isCardVisible = computed(
+            () => props.searchName && currentChild.value
+          );
 
           const handleStamp = async () => {
             if (props.stampAnimation !== null) return;
@@ -759,24 +819,26 @@
             stats,
             progress,
             isCardVisible,
-            handleStamp
+            handleStamp,
           };
-        }
+        },
       };
 
       const AddChildView = {
         template: "#add-child-view-template",
         props: ["childrenList"],
-        emits: ["refresh-profiles", "update-child", "set-search-name"],
+        emits: ["refresh-profiles", "set-search-name"],
         setup(props, { emit }) {
           const formState = reactive({
             name: "",
             theme: "matcha",
             bgUrl: "",
-            stamp: ""
+            stamp: "",
           });
 
-          const previewTheme = computed(() => CARD_THEMES[formState.theme] || CARD_THEMES.default);
+          const previewTheme = computed(
+            () => CARD_THEMES[formState.theme] || CARD_THEMES.default
+          );
           const getTheme = (key) => CARD_THEMES[key] || CARD_THEMES.default;
 
           const handleSave = async () => {
@@ -785,7 +847,12 @@
               return;
             }
             try {
-              await sendAddChild(formState.name, formState.theme, formState.bgUrl, formState.stamp);
+              await sendAddChild(
+                formState.name,
+                formState.theme,
+                formState.bgUrl,
+                formState.stamp
+              );
               alert("已送出，請稍後重新整理名單");
               formState.name = "";
               formState.bgUrl = "";
@@ -809,9 +876,9 @@
             getTheme,
             handleSave,
             handleEdit,
-            CARD_THEMES
+            CARD_THEMES,
           };
-        }
+        },
       };
 
       const SummaryView = {
@@ -838,14 +905,14 @@
                   name,
                   total,
                   theme: getTheme(child?.theme),
-                  bgUrl: child?.bgUrl || ""
+                  bgUrl: child?.bgUrl || "",
                 };
               })
               .sort((a, b) => b.total - a.total);
           });
 
           return { summary, getTheme };
-        }
+        },
       };
 
       const SettingsView = {
@@ -861,7 +928,7 @@
           };
 
           return { config, saveSettings };
-        }
+        },
       };
 
       const RedeemModal = {
@@ -871,9 +938,12 @@
         setup(props, { emit }) {
           const redeemCount = ref(10);
 
-          watch(() => props.visible, (newVal) => {
-            if (newVal) redeemCount.value = Math.min(10, props.currentPoints);
-          });
+          watch(
+            () => props.visible,
+            (newVal) => {
+              if (newVal) redeemCount.value = Math.min(10, props.currentPoints);
+            }
+          );
 
           const close = () => emit("close");
 
@@ -903,7 +973,7 @@
 
           return { redeemCount, close, confirm, increaseCount, decreaseCount };
         },
-        components: { Teleport }
+        components: { Teleport },
       };
 
       // ==================== APP ====================
@@ -921,26 +991,39 @@
           const redeemModal = reactive({
             visible: false,
             name: "",
-            currentPoints: 0
+            currentPoints: 0,
+          });
+
+          const successModal = reactive({
+            visible: false,
+            message: "",
           });
 
           const tabs = [
             { id: "stamp", label: "集點卡", icon: "stamp" },
             { id: "add", label: "名單", icon: "user-plus" },
             { id: "summary", label: "狀況", icon: "chart-simple" },
-            { id: "settings", label: "設定", icon: "gear" }
+            { id: "settings", label: "設定", icon: "gear" },
           ];
 
           const loadData = async () => {
             isLoading.value = true;
             try {
               const timestamp = Date.now();
-              const pointsUrl = config.pointsSheetUrl + (config.pointsSheetUrl.includes('?') ? '&' : '?') + 't=' + timestamp;
-              const profilesUrl = config.profilesSheetUrl + (config.profilesSheetUrl.includes('?') ? '&' : '?') + 't=' + timestamp;
-              
+              const pointsUrl =
+                config.pointsSheetUrl +
+                (config.pointsSheetUrl.includes("?") ? "&" : "?") +
+                "t=" +
+                timestamp;
+              const profilesUrl =
+                config.profilesSheetUrl +
+                (config.profilesSheetUrl.includes("?") ? "&" : "?") +
+                "t=" +
+                timestamp;
+
               const [pointsData, profilesData] = await Promise.all([
                 fetchSheetData(pointsUrl),
-                fetchProfilesData(profilesUrl)
+                fetchProfilesData(profilesUrl),
               ]);
               transactions.value = pointsData;
               childrenList.value = profilesData;
@@ -958,22 +1041,21 @@
                 type: "add",
                 name,
                 points: "1",
-                timestamp: formatDate(new Date())
+                timestamp: formatDate(new Date()),
               });
             } catch (error) {
               console.error("集點失敗:", error);
             }
           };
 
-          const removeLastTransaction = (name) => {
-            const idx = transactions.value.map((t) => t.name).lastIndexOf(name);
-            if (idx !== -1) transactions.value.splice(idx, 1);
-          };
-
           const refreshProfiles = async () => {
             try {
               const timestamp = Date.now();
-              const profilesUrl = config.profilesSheetUrl + (config.profilesSheetUrl.includes('?') ? '&' : '?') + 't=' + timestamp;
+              const profilesUrl =
+                config.profilesSheetUrl +
+                (config.profilesSheetUrl.includes("?") ? "&" : "?") +
+                "t=" +
+                timestamp;
               const profilesData = await fetchProfilesData(profilesUrl);
               childrenList.value = profilesData;
             } catch (error) {
@@ -985,7 +1067,11 @@
             isLoading.value = true;
             try {
               const timestamp = Date.now();
-              const pointsUrl = config.pointsSheetUrl + (config.pointsSheetUrl.includes('?') ? '&' : '?') + 't=' + timestamp;
+              const pointsUrl =
+                config.pointsSheetUrl +
+                (config.pointsSheetUrl.includes("?") ? "&" : "?") +
+                "t=" +
+                timestamp;
               const pointsData = await fetchSheetData(pointsUrl);
               transactions.value = pointsData;
             } catch (error) {
@@ -993,10 +1079,6 @@
             } finally {
               isLoading.value = false;
             }
-          };
-
-          const updateChild = (child) => {
-            console.log("更新:", child);
           };
 
           const setSearchName = (name) => {
@@ -1026,10 +1108,14 @@
                 type: "redeem",
                 name: redeemModal.name,
                 points: String(-count),
-                timestamp: formatDate(new Date())
+                timestamp: formatDate(new Date()),
               });
               closeRedeemModal();
-              alert(`成功兌換 ${count} 點`);
+              successModal.message = `成功兌換 ${count} 點`;
+              successModal.visible = true;
+              setTimeout(() => {
+                successModal.visible = false;
+              }, 500);
             } catch (error) {
               alert("兌換失敗: " + error.message);
             }
@@ -1044,6 +1130,13 @@
             activeTab.value = tabId;
           };
 
+          // 監聽 searchName 變化，自動儲存
+          watch(searchName, (newName) => {
+            if (newName) {
+              localStorage.setItem("last-search-name", newName);
+            }
+          });
+
           onMounted(() => {
             const saved = localStorage.getItem("app-config");
             if (saved) {
@@ -1053,6 +1146,13 @@
                 console.error("設定載入失敗:", e);
               }
             }
+
+            // 載入上次搜尋的名字
+            const lastSearchName = localStorage.getItem("last-search-name");
+            if (lastSearchName) {
+              searchName.value = lastSearchName;
+            }
+
             loadData();
           });
 
@@ -1065,19 +1165,18 @@
             isLoading,
             config,
             redeemModal,
+            successModal,
             tabs,
             addTransaction,
-            removeLastTransaction,
             refreshProfiles,
             refreshPoints,
-            updateChild,
             setSearchName,
             selectUser,
             showRedeemModal,
             closeRedeemModal,
             confirmRedeem,
             saveConfig,
-            switchTab
+            switchTab,
           };
         },
         components: {
@@ -1085,8 +1184,8 @@
           AddChildView,
           SummaryView,
           SettingsView,
-          RedeemModal
-        }
+          RedeemModal,
+        },
       };
 
       createApp(App).mount("#app");
