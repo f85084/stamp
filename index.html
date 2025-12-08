@@ -152,7 +152,7 @@
               </div>
             </div>
 
-            <div class="mb-6 relative z-10">
+            <div class="mb-8 relative z-10">
               <p class="text-center text-stone-400 text-xs mb-2">
                 還差
                 <span :class="currentTheme.text + ' font-bold text-base mx-1'">{{ 10 - stats.currentCard }}</span>
@@ -268,36 +268,6 @@
               </button>
             </div>
           </div>
-        </div>
-      </div>
-    </script>
-
-    <script type="text/x-template" id="settings-view-template">
-      <div class="px-6 pt-6 pb-24 animate-fade-in">
-        <h1 class="text-2xl font-serif text-stone-800 mb-6">設定</h1>
-        <div class="bg-white p-6 rounded-3xl shadow-sm border border-stone-100 space-y-6">
-          <div class="space-y-2">
-            <label class="text-sm font-bold text-stone-500">Google Sheet (Points)</label>
-            <input
-              v-model="config.pointsSheetUrl"
-              type="text"
-              class="w-full text-xs p-3 bg-stone-50 rounded-xl text-stone-600"
-            />
-          </div>
-          <div class="space-y-2">
-            <label class="text-sm font-bold text-stone-500">Google Sheet (Profiles)</label>
-            <input
-              v-model="config.profilesSheetUrl"
-              type="text"
-              class="w-full text-xs p-3 bg-stone-50 rounded-xl text-stone-600"
-            />
-          </div>
-          <button
-            @click="saveSettings"
-            class="w-full py-4 bg-stone-800 text-white font-bold rounded-xl"
-          >
-            儲存設定
-          </button>
         </div>
       </div>
     </script>
@@ -479,11 +449,6 @@
             @redeem="showRedeemModal"
             @edit-profile="showEditProfileModal"
             @add-new-profile="showAddProfileModal"
-          />
-          <SettingsView
-            v-else-if="activeTab === 'settings'"
-            :config="config"
-            @save-config="saveConfig"
           />
         </main>
 
@@ -874,22 +839,6 @@
         },
       };
 
-      const SettingsView = {
-        template: "#settings-view-template",
-        props: ["config"],
-        emits: ["save-config"],
-        setup(props, { emit }) {
-          const config = reactive({ ...props.config });
-
-          const saveSettings = () => {
-            emit("save-config", config);
-            alert("設定已儲存");
-          };
-
-          return { config, saveSettings };
-        },
-      };
-
       const RedeemModal = {
         template: "#redeem-modal-template",
         props: ["visible", "name", "currentPoints"],
@@ -1034,7 +983,6 @@
           const tabs = [
             { id: "stamp", label: "集點卡", icon: "stamp" },
             { id: "summary", label: "狀況", icon: "chart-simple" },
-            { id: "settings", label: "設定", icon: "gear" },
           ];
 
           const loadData = async () => {
@@ -1079,21 +1027,6 @@
             }
           };
 
-          const refreshProfiles = async () => {
-            try {
-              const timestamp = Date.now();
-              const profilesUrl =
-                config.profilesSheetUrl +
-                (config.profilesSheetUrl.includes("?") ? "&" : "?") +
-                "t=" +
-                timestamp;
-              const profilesData = await fetchProfilesData(profilesUrl);
-              childrenList.value = profilesData;
-            } catch (error) {
-              console.error("重整失敗:", error);
-            }
-          };
-
           const refreshPoints = async () => {
             isLoading.value = true;
             try {
@@ -1110,11 +1043,6 @@
             } finally {
               isLoading.value = false;
             }
-          };
-
-          const setSearchName = (name) => {
-            searchName.value = name;
-            activeTab.value = "stamp";
           };
 
           const selectUser = (name) => {
@@ -1200,11 +1128,6 @@
             }
           };
 
-          const saveConfig = (newConfig) => {
-            Object.assign(config, newConfig);
-            localStorage.setItem("app-config", JSON.stringify(config));
-          };
-
           const switchTab = (tabId) => {
             activeTab.value = tabId;
           };
@@ -1217,15 +1140,6 @@
           });
 
           onMounted(() => {
-            const saved = localStorage.getItem("app-config");
-            if (saved) {
-              try {
-                Object.assign(config, JSON.parse(saved));
-              } catch (e) {
-                console.error("設定載入失敗:", e);
-              }
-            }
-
             // 載入上次搜尋的名字
             const lastSearchName = localStorage.getItem("last-search-name");
             if (lastSearchName) {
@@ -1248,9 +1162,7 @@
             successModal,
             tabs,
             addTransaction,
-            refreshProfiles,
             refreshPoints,
-            setSearchName,
             selectUser,
             showRedeemModal,
             closeRedeemModal,
@@ -1260,14 +1172,12 @@
             closeEditProfileModal,
             saveProfile,
             showSuccessModal,
-            saveConfig,
             switchTab,
           };
         },
         components: {
           StampView,
           SummaryView,
-          SettingsView,
           RedeemModal,
           EditProfileModal,
         },
