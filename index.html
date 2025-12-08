@@ -340,12 +340,20 @@
       <div class="px-6 pt-8 pb-36 animate-fade-in">
         <div class="flex justify-between items-center mb-6">
           <h1 class="text-2xl font-serif text-stone-800">集點狀況</h1>
-          <button
-            @click="$emit('refresh-points')"
-            class="p-2 bg-white rounded-full shadow-sm text-stone-400 hover:text-emerald-600 active:rotate-180 transition-all"
-          >
-            <i class="fa-solid fa-rotate"></i>
-          </button>
+          <div class="flex gap-2">
+            <button
+              @click="$emit('add-new-profile')"
+              class="px-4 py-2 bg-emerald-500 text-white rounded-full shadow-sm hover:bg-emerald-600 transition-all text-xs font-bold"
+            >
+              <i class="fa-solid fa-plus"></i> 新增名單
+            </button>
+            <button
+              @click="$emit('refresh-points')"
+              class="p-2 bg-white rounded-full shadow-sm text-stone-400 hover:text-emerald-600 active:rotate-180 transition-all"
+            >
+              <i class="fa-solid fa-rotate"></i>
+            </button>
+          </div>
         </div>
 
         <div v-if="isLoading" class="flex justify-center py-10">
@@ -371,12 +379,20 @@
                 </p>
               </div>
             </div>
-            <button
-              @click="$emit('redeem', item.name, item.total)"
-              class="px-4 py-2 bg-rose-50 text-rose-500 hover:bg-rose-100 rounded-xl text-xs font-bold border border-rose-100 transition-colors"
-            >
-              兌換
-            </button>
+            <div class="flex gap-2 items-center">
+              <button
+                @click="$emit('edit-profile', item.name)"
+                class="p-2 text-stone-400 hover:text-stone-600 transition-colors"
+              >
+                <i class="fa-solid fa-gear"></i>
+              </button>
+              <button
+                @click="$emit('redeem', item.name, item.total)"
+                class="px-4 py-2 bg-rose-50 text-rose-500 hover:bg-rose-100 rounded-xl text-xs font-bold border border-rose-100 transition-colors"
+              >
+                兌換
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -464,6 +480,105 @@
       </Teleport>
     </script>
 
+    <script type="text/x-template" id="edit-profile-modal-template">
+      <Teleport to="body">
+        <div
+          v-if="visible"
+          class="fixed inset-0 z-[70] flex items-center justify-center bg-black/30 backdrop-blur-sm"
+          @click.self="close"
+        >
+          <div class="bg-white rounded-2xl w-full max-w-md p-6 animate-pop shadow-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg font-bold text-center mb-6">{{ isNewProfile ? '新增名單' : '編輯名單' }}</h3>
+
+            <div class="space-y-6">
+              <div class="space-y-2">
+                <label class="text-xs font-bold text-stone-400 tracking-wider">姓名</label>
+                <input
+                  v-model="formState.name"
+                  type="text"
+                  class="block w-full p-4 bg-stone-50 rounded-2xl border-none focus:ring-2 focus:ring-stone-200 text-lg text-stone-800"
+                  placeholder="例如: Anna"
+                />
+              </div>
+
+              <div class="space-y-2">
+                <label class="text-xs font-bold text-stone-400 tracking-wider flex items-center gap-2">
+                  <i class="fa-solid fa-image"></i> 圖片網址
+                </label>
+                <input
+                  v-model="formState.bgUrl"
+                  type="text"
+                  class="block w-full p-3 bg-stone-50 rounded-2xl border-none text-sm text-stone-600"
+                  placeholder="https://..."
+                />
+              </div>
+
+              <div class="space-y-2">
+                <label class="text-xs font-bold text-stone-400 tracking-wider flex items-center gap-2">
+                  <i class="fa-solid fa-stamp"></i> 自訂印章 (圖片網址或 Emoji)
+                </label>
+                <input
+                  v-model="formState.stamp"
+                  type="text"
+                  class="block w-full p-3 bg-stone-50 rounded-2xl border-none text-sm text-stone-600"
+                  placeholder="例如: 🐻 或 https://..."
+                />
+              </div>
+
+              <div class="space-y-3">
+                <label class="text-xs font-bold text-stone-400 tracking-wider flex items-center gap-2">
+                  <i class="fa-solid fa-palette"></i> 風格
+                </label>
+                <div class="grid grid-cols-6 gap-2">
+                  <button
+                    v-for="[key, theme] in Object.entries(CARD_THEMES).filter(([k]) => k !== 'default')"
+                    :key="key"
+                    type="button"
+                    @click="formState.theme = key"
+                    :class="[
+                      'aspect-square rounded-xl flex flex-col items-center justify-center gap-1 border-2 transition-all',
+                      formState.theme === key
+                        ? 'border-stone-800 bg-stone-50 scale-105'
+                        : 'border-transparent hover:bg-stone-50',
+                    ]"
+                  >
+                    <div :class="'w-5 h-5 rounded-full ' + theme.bg"></div>
+                    <span class="text-[9px] text-stone-500">{{ theme.name }}</span>
+                  </button>
+                </div>
+              </div>
+
+              <div :class="'p-4 rounded-xl ' + previewTheme.accent + ' flex items-center justify-center relative overflow-hidden'">
+                <div
+                  v-if="formState.bgUrl"
+                  class="absolute inset-0 bg-cover bg-center opacity-40"
+                  :style="{ backgroundImage: 'url(' + formState.bgUrl + ')' }"
+                ></div>
+                <span :class="'text-sm font-bold ' + previewTheme.text + ' relative z-10'">
+                  {{ formState.name || '預覽' }}
+                </span>
+              </div>
+
+              <div class="flex space-x-3">
+                <button
+                  @click="close"
+                  class="flex-1 py-3 bg-stone-100 rounded-xl font-bold text-stone-500 hover:bg-stone-200 transition-colors"
+                >
+                  取消
+                </button>
+                <button
+                  @click="save"
+                  class="flex-1 py-3 bg-stone-800 text-white rounded-xl font-bold shadow-lg shadow-stone-200 hover:bg-stone-700 transition-colors"
+                >
+                  {{ isNewProfile ? '新增' : '儲存/更新' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Teleport>
+    </script>
+
     <script type="text/x-template" id="app-template">
       <div
         id="app"
@@ -495,6 +610,8 @@
             @refresh-points="refreshPoints"
             @select-user="selectUser"
             @redeem="showRedeemModal"
+            @edit-profile="showEditProfileModal"
+            @add-new-profile="showAddProfileModal"
           />
           <SettingsView
             v-else-if="activeTab === 'settings'"
@@ -540,6 +657,14 @@
           :currentPoints="redeemModal.currentPoints"
           @close="closeRedeemModal"
           @confirm="confirmRedeem"
+        />
+
+        <EditProfileModal
+          :visible="editProfileModal.visible"
+          :profileName="editProfileModal.profileName"
+          :childrenList="childrenList"
+          @close="closeEditProfileModal"
+          @save="saveProfile"
         />
 
         <Teleport to="body">
@@ -800,8 +925,24 @@
             () => props.searchName && currentChild.value
           );
 
+          const checkAdminPassword = () => {
+            const saved = localStorage.getItem("admin-verified");
+            if (saved === "true") {
+              return true;
+            }
+            const password = prompt("請輸入管理員密碼：");
+            if (password === "admin") {
+              localStorage.setItem("admin-verified", "true");
+              return true;
+            } else {
+              alert("密碼錯誤");
+              return false;
+            }
+          };
+
           const handleStamp = async () => {
             if (props.stampAnimation !== null) return;
+            if (!checkAdminPassword()) return;
             emit("update:stampAnimation", "stamping");
             emit("add-transaction", props.searchName);
             setTimeout(() => {
@@ -885,7 +1026,13 @@
       const SummaryView = {
         template: "#summary-view-template",
         props: ["transactions", "childrenList", "isLoading"],
-        emits: ["refresh-points", "select-user", "redeem"],
+        emits: [
+          "refresh-points",
+          "select-user",
+          "redeem",
+          "edit-profile",
+          "add-new-profile",
+        ],
         setup(props) {
           const getTheme = (key) => CARD_THEMES[key] || CARD_THEMES.default;
 
@@ -977,6 +1124,74 @@
         components: { Teleport },
       };
 
+      const EditProfileModal = {
+        template: "#edit-profile-modal-template",
+        props: ["visible", "profileName", "childrenList"],
+        emits: ["close", "save"],
+        setup(props, { emit }) {
+          const formState = reactive({
+            name: "",
+            theme: "matcha",
+            bgUrl: "",
+            stamp: "",
+          });
+
+          const isNewProfile = computed(() => !props.profileName);
+          const previewTheme = computed(
+            () => CARD_THEMES[formState.theme] || CARD_THEMES.default
+          );
+
+          watch(
+            () => props.visible,
+            (newVal) => {
+              if (newVal) {
+                if (props.profileName) {
+                  const child = props.childrenList.find(
+                    (c) => c.name === props.profileName
+                  );
+                  if (child) {
+                    formState.name = child.name;
+                    formState.theme = child.theme || "matcha";
+                    formState.bgUrl = child.bgUrl || "";
+                    formState.stamp = child.stamp || "";
+                  }
+                } else {
+                  formState.name = "";
+                  formState.theme = "matcha";
+                  formState.bgUrl = "";
+                  formState.stamp = "";
+                }
+              }
+            }
+          );
+
+          const close = () => emit("close");
+
+          const save = async () => {
+            if (!formState.name.trim()) {
+              alert("請輸入姓名");
+              return;
+            }
+            emit("save", {
+              name: formState.name,
+              theme: formState.theme,
+              bgUrl: formState.bgUrl,
+              stamp: formState.stamp,
+            });
+          };
+
+          return {
+            formState,
+            isNewProfile,
+            previewTheme,
+            close,
+            save,
+            CARD_THEMES,
+          };
+        },
+        components: { Teleport },
+      };
+
       // ==================== APP ====================
       const App = {
         template: "#app-template",
@@ -993,6 +1208,11 @@
             visible: false,
             name: "",
             currentPoints: 0,
+          });
+
+          const editProfileModal = reactive({
+            visible: false,
+            profileName: "",
           });
 
           const successModal = reactive({
@@ -1111,6 +1331,21 @@
           };
 
           const confirmRedeem = async (count) => {
+            const saved = localStorage.getItem("admin-verified");
+            let isVerified = saved === "true";
+
+            if (!isVerified) {
+              const password = prompt("請輸入管理員密碼：");
+              if (password === "admin") {
+                localStorage.setItem("admin-verified", "true");
+                isVerified = true;
+              } else {
+                alert("密碼錯誤");
+                closeRedeemModal();
+                return;
+              }
+            }
+
             try {
               await sendTransaction("redeem", redeemModal.name, -count);
               transactions.value.push({
@@ -1123,6 +1358,35 @@
               showSuccessModal(`成功兌換 ${count} 點`);
             } catch (error) {
               alert("兌換失敗: " + error.message);
+            }
+          };
+
+          const showEditProfileModal = (name) => {
+            editProfileModal.profileName = name;
+            editProfileModal.visible = true;
+          };
+
+          const showAddProfileModal = () => {
+            editProfileModal.profileName = "";
+            editProfileModal.visible = true;
+          };
+
+          const closeEditProfileModal = () => {
+            editProfileModal.visible = false;
+          };
+
+          const saveProfile = async (profileData) => {
+            try {
+              await sendAddChild(
+                profileData.name,
+                profileData.theme,
+                profileData.bgUrl,
+                profileData.stamp
+              );
+              closeEditProfileModal();
+              showSuccessModal("已送出，請稍後重新整理名單");
+            } catch (error) {
+              alert("送出失敗: " + error.message);
             }
           };
 
@@ -1170,6 +1434,7 @@
             isLoading,
             config,
             redeemModal,
+            editProfileModal,
             successModal,
             tabs,
             addTransaction,
@@ -1180,6 +1445,10 @@
             showRedeemModal,
             closeRedeemModal,
             confirmRedeem,
+            showEditProfileModal,
+            showAddProfileModal,
+            closeEditProfileModal,
+            saveProfile,
             showSuccessModal,
             saveConfig,
             switchTab,
@@ -1191,6 +1460,7 @@
           SummaryView,
           SettingsView,
           RedeemModal,
+          EditProfileModal,
         },
       };
 
