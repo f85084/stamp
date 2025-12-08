@@ -149,6 +149,16 @@
                   <i class="fa-solid fa-gift"></i>
                   <span class="text-3xl font-bold leading-none">{{ stats.rewards }}</span>
                 </div>
+                <div class="mt-3">
+                  <p class="text-center text-stone-400 text-xs mb-2">
+                    還差
+                    <span :class="currentTheme.text + ' font-bold text-base mx-1'">{{ 10 - stats.currentCard }}</span>
+                    點
+                  </p>
+                  <div class="h-1.5 w-full bg-stone-100 rounded-full overflow-hidden">
+                    <div :class="'h-full transition-all duration-1000 ease-out ' + currentTheme.bg" :style="{ width: progress + '%' }"></div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -169,17 +179,6 @@
                   <i v-else class="fa-solid fa-stamp"></i>
                 </template>
                 <template v-else>{{ i }}</template>
-              </div>
-            </div>
-
-            <div class="relative z-10">
-              <p class="text-center text-stone-400 text-xs mb-2">
-                還差
-                <span :class="currentTheme.text + ' font-bold text-base mx-1'">{{ 10 - stats.currentCard }}</span>
-                點
-              </p>
-              <div class="h-1.5 w-full bg-stone-100 rounded-full overflow-hidden">
-                <div :class="'h-full transition-all duration-1000 ease-out ' + currentTheme.bg" :style="{ width: progress + '%' }"></div>
               </div>
             </div>
           </div>
@@ -209,129 +208,6 @@
               style="border-color: currentColor"
             ></span>
           </button>
-        </div>
-      </div>
-    </script>
-
-    <script type="text/x-template" id="add-child-view-template">
-      <div class="px-6 pt-8 pb-36 animate-fade-in">
-        <h1 class="text-2xl font-serif text-stone-800 mb-6">名單管理</h1>
-
-        <div class="bg-white p-6 rounded-3xl shadow-sm border border-stone-100 space-y-6">
-          <div class="space-y-2">
-            <label class="text-xs font-bold text-stone-400 tracking-wider">姓名</label>
-            <input
-              v-model="formState.name"
-              type="text"
-              class="block w-full p-4 bg-stone-50 rounded-2xl border-none focus:ring-2 focus:ring-stone-200 text-lg text-stone-800"
-              placeholder="例如: Anna"
-            />
-          </div>
-
-          <div class="space-y-2">
-            <label class="text-xs font-bold text-stone-400 tracking-wider flex items-center gap-2">
-              <i class="fa-solid fa-image"></i> 圖片網址
-            </label>
-            <input
-              v-model="formState.bgUrl"
-              type="text"
-              class="block w-full p-3 bg-stone-50 rounded-2xl border-none text-sm text-stone-600"
-              placeholder="https://..."
-            />
-          </div>
-
-          <div class="space-y-2">
-            <label class="text-xs font-bold text-stone-400 tracking-wider flex items-center gap-2">
-              <i class="fa-solid fa-stamp"></i> 自訂印章 (圖片網址或 Emoji)
-            </label>
-            <input
-              v-model="formState.stamp"
-              type="text"
-              class="block w-full p-3 bg-stone-50 rounded-2xl border-none text-sm text-stone-600"
-              placeholder="例如: 🐻 或 https://..."
-            />
-          </div>
-
-          <div class="space-y-3">
-            <label class="text-xs font-bold text-stone-400 tracking-wider flex items-center gap-2">
-              <i class="fa-solid fa-palette"></i> 風格
-            </label>
-            <div class="grid grid-cols-6 gap-2">
-              <button
-                v-for="[key, theme] in Object.entries(CARD_THEMES).filter(([k]) => k !== 'default')"
-                :key="key"
-                type="button"
-                @click="formState.theme = key"
-                :class="[
-                  'aspect-square rounded-xl flex flex-col items-center justify-center gap-1 border-2 transition-all',
-                  formState.theme === key
-                    ? 'border-stone-800 bg-stone-50 scale-105'
-                    : 'border-transparent hover:bg-stone-50',
-                ]"
-              >
-                <div :class="'w-5 h-5 rounded-full ' + theme.bg"></div>
-                <span class="text-[9px] text-stone-500">{{ theme.name }}</span>
-              </button>
-            </div>
-          </div>
-
-          <div :class="'p-4 rounded-xl ' + previewTheme.accent + ' flex items-center justify-center relative overflow-hidden'">
-            <div
-              v-if="formState.bgUrl"
-              class="absolute inset-0 bg-cover bg-center opacity-40"
-              :style="{ backgroundImage: 'url(' + formState.bgUrl + ')' }"
-            ></div>
-            <span :class="'text-sm font-bold ' + previewTheme.text + ' relative z-10'">
-              {{ formState.name || '預覽' }}
-            </span>
-          </div>
-
-          <button
-            @click="handleSave"
-            class="w-full py-4 bg-stone-800 text-white rounded-xl font-bold shadow-lg shadow-stone-200 active:scale-95 transition-all flex items-center justify-center gap-2"
-          >
-            <i class="fa-solid fa-save"></i> 儲存/更新
-          </button>
-        </div>
-
-        <div class="mt-8 space-y-4">
-          <div class="flex justify-between items-center">
-            <h3 class="text-xs font-bold text-stone-400 tracking-wider uppercase">
-              雲端名單 ({{ childrenList.length }})
-            </h3>
-            <button
-              @click="$emit('refresh-profiles')"
-              class="text-xs text-emerald-600 font-bold flex items-center gap-1"
-            >
-              <i class="fa-solid fa-rotate"></i> 重整
-            </button>
-          </div>
-
-          <div class="grid gap-3 pb-8">
-            <div
-              v-for="child in childrenList"
-              :key="child.name"
-              class="flex items-center justify-between p-4 bg-white rounded-2xl border border-stone-100 shadow-sm"
-            >
-              <div class="flex items-center gap-3">
-                <div :class="'w-10 h-10 rounded-full flex items-center justify-center text-white text-sm ' + getTheme(child.theme).bg + ' overflow-hidden'">
-                  <img v-if="child.bgUrl" :src="child.bgUrl" class="w-full h-full object-cover" />
-                  <template v-else>{{ child.name.charAt(0) }}</template>
-                </div>
-                <div class="flex flex-col">
-                  <span class="text-stone-700 font-bold text-sm">{{ child.name }}</span>
-                  <span class="text-[10px] text-stone-400 flex items-center gap-1">
-                    <img v-if="child.stamp?.startsWith('http')" :src="child.stamp" class="w-4 h-4 object-contain" />
-                    <template v-else-if="child.stamp">{{ child.stamp }}</template>
-                    <i v-else class="fa-solid fa-stamp"></i>
-                  </span>
-                </div>
-              </div>
-              <button @click="handleEdit(child)" class="text-stone-400 hover:text-stone-600 p-2">
-                <i class="fa-solid fa-edit"></i>
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </script>
@@ -594,13 +470,6 @@
             @update:searchName="searchName = $event"
             @update:stampAnimation="stampAnimation = $event"
             @add-transaction="addTransaction"
-          />
-          <AddChildView
-            v-else-if="activeTab === 'add'"
-            :childrenList="childrenList"
-            @refresh-profiles="refreshProfiles"
-            @set-search-name="setSearchName"
-            @show-success="showSuccessModal"
           />
           <SummaryView
             v-else-if="activeTab === 'summary'"
@@ -966,63 +835,6 @@
         },
       };
 
-      const AddChildView = {
-        template: "#add-child-view-template",
-        props: ["childrenList"],
-        emits: ["refresh-profiles", "set-search-name", "show-success"],
-        setup(props, { emit }) {
-          const formState = reactive({
-            name: "",
-            theme: "matcha",
-            bgUrl: "",
-            stamp: "",
-          });
-
-          const previewTheme = computed(
-            () => CARD_THEMES[formState.theme] || CARD_THEMES.default
-          );
-          const getTheme = (key) => CARD_THEMES[key] || CARD_THEMES.default;
-
-          const handleSave = async () => {
-            if (!formState.name.trim()) {
-              alert("請輸入姓名");
-              return;
-            }
-            try {
-              await sendAddChild(
-                formState.name,
-                formState.theme,
-                formState.bgUrl,
-                formState.stamp
-              );
-              emit("show-success", "已送出，請稍後重新整理名單");
-              formState.name = "";
-              formState.bgUrl = "";
-              formState.stamp = "";
-              formState.theme = "matcha";
-            } catch (error) {
-              alert("送出失敗: " + error.message);
-            }
-          };
-
-          const handleEdit = (child) => {
-            formState.name = child.name;
-            formState.theme = child.theme || "matcha";
-            formState.bgUrl = child.bgUrl || "";
-            formState.stamp = child.stamp || "";
-          };
-
-          return {
-            formState,
-            previewTheme,
-            getTheme,
-            handleSave,
-            handleEdit,
-            CARD_THEMES,
-          };
-        },
-      };
-
       const SummaryView = {
         template: "#summary-view-template",
         props: ["transactions", "childrenList", "isLoading"],
@@ -1223,7 +1035,6 @@
 
           const tabs = [
             { id: "stamp", label: "集點卡", icon: "stamp" },
-            { id: "add", label: "名單", icon: "user-plus" },
             { id: "summary", label: "狀況", icon: "chart-simple" },
             { id: "settings", label: "設定", icon: "gear" },
           ];
@@ -1457,7 +1268,6 @@
         },
         components: {
           StampView,
-          AddChildView,
           SummaryView,
           SettingsView,
           RedeemModal,
