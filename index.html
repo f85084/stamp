@@ -1037,23 +1037,24 @@
           const getTheme = (key) => CARD_THEMES[key] || CARD_THEMES.default;
 
           const summary = computed(() => {
+            // 先計算每個人的點數
             const nameMap = {};
             props.transactions.forEach((t) => {
-              if (!t.name || !t.name.trim()) return; // 跳過空名稱
+              if (!t.name || !t.name.trim()) return;
               const pts = parseInt(t.points || 0);
               if (!nameMap[t.name]) nameMap[t.name] = 0;
               nameMap[t.name] += pts;
             });
 
-            return Object.entries(nameMap)
-              .filter(([name]) => name && name.trim()) // 過濾空名稱
-              .map(([name, total]) => {
-                const child = props.childrenList.find((c) => c.name === name);
+            // 顯示所有在名單內的人，包括點數為 0 的
+            return props.childrenList
+              .map((child) => {
+                const total = nameMap[child.name] || 0;
                 return {
-                  name,
+                  name: child.name,
                   total,
-                  theme: getTheme(child?.theme),
-                  bgUrl: child?.bgUrl || "",
+                  theme: getTheme(child.theme),
+                  bgUrl: child.bgUrl || "",
                 };
               })
               .sort((a, b) => b.total - a.total);
